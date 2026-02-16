@@ -1,6 +1,7 @@
 import whisper
 import os
 
+
 # Load model once
 model = whisper.load_model("tiny")
 
