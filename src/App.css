@@ -1,0 +1,175 @@
+/* Global */
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  padding:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f3f4f6;
+}
+
+/* App */
+.app{
+  text-align:center;
+
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Navbar */
+.navbar{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  margin-top:20px;
+  margin-bottom:10px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.icon{
+  background:#5b4cf0;
+  color:white;
+  padding:10px;
+  border-radius:10px;
+}
+
+/* Tabs */
+.tabs{
+  margin-top:15px;
+  background:#e5e7eb;
+  padding:6px;
+  border-radius:30px;
+}
+
+.tabs button{
+  border:none;
+  background:transparent;
+  padding:10px 25px;
+  border-radius:25px;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.tabs button:hover{
+  background:#ffffff;
+}
+
+.tabs .active{
+  background:white;
+  box-shadow:0px 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Card */
+.card{
+  width:650px;
+  max-width:90%;
+
+  margin:0 auto;
+
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.05);
+
+  flex-grow:1;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+/* Text */
+.card h1{
+  margin-bottom:10px;
+}
+
+.card p{
+  color:#6b7280;
+}
+
+/* Upload */
+.uploadBox{
+  border:2px dashed #d1d5db;
+  padding:30px;
+  border-radius:15px;
+  margin-top:20px;
+  position:relative;
+  cursor:pointer;
+}
+
+.uploadBox:hover{
+  background:#fafafa;
+}
+
+.uploadIcon{
+  font-size:35px;
+  color:#9ca3af;
+}
+
+.uploadBox p{
+  margin:10px 0;
+}
+
+.uploadBox span{
+  font-size:13px;
+  color:#9ca3af;
+}
+
+.uploadBox input{
+  position:absolute;
+  width:100%;
+  height:100%;
+  opacity:0;
+  top:0;
+  left:0;
+  cursor:pointer;
+}
+
+/* OR */
+.or{
+  margin:15px 0;
+  color:#6b7280;
+}
+
+/* Button */
+.recordBtn{
+  background:#5b4cf0;
+  color:white;
+  border:none;
+  padding:14px 35px;
+  font-size:16px;
+  border-radius:30px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.recordBtn:hover{
+  background:#4a3ed6;
+}
+
+/* Features */
+.featureCard{
+  display:flex;
+  align-items:flex-start;
+  gap:15px;
+  background:#f9fafb;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+  text-align:left;
+}
+
+.featureIcon{
+  font-size:24px;
+}

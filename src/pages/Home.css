@@ -1,0 +1,37 @@
+.card{
+  text-align:center;
+}
+
+/* Heading */
+.card h1{
+  font-size:20px;
+  margin-bottom:10px;
+}
+
+/* Description */
+.card p{
+  color:#6b7280;
+}
+
+/* OR text */
+.or{
+  margin:15px 0;
+  color:#6b7280;
+  font-size:14px;
+}
+
+/* Record button */
+.recordBtn{
+  background:#5b4cf0;
+  color:white;
+  border:none;
+  padding:14px 35px;
+  font-size:16px;
+  border-radius:30px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.recordBtn:hover{
+  background:#4a3ed6;
+}
