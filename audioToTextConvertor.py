@@ -5,12 +5,15 @@ import os
 # Load model once
 model = whisper.load_model("tiny")
 
+# Base directory (same folder as this script)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
 # Create output folder
-output_folder = "transcripts"
+output_folder = os.path.join(base_dir, "transcripts")
 os.makedirs(output_folder, exist_ok=True)
 
 # Audio folder path
-audio_folder = r"D:\MegaProject\audio"
+audio_folder = os.path.join(base_dir, "audio")
 
 # Get all .wav audio files automatically
 audio_files = [
@@ -38,4 +41,4 @@ for audio in audio_files:
 
     print(f"Saved: {txt_file}\n")
 
-print("All audio files transcribed successfully ✅")
+print("All audio files transcribed successfully")
