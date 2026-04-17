@@ -1,40 +1,30 @@
 import os
-import re
+import nltk
+
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
+
+# Base directory (same folder as this script)
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Input and Output folders
-input_folder = r"D:\MegaProject\transcripts"
-output_folder = r"D:\MegaProject\tokens"
+input_folder = os.path.join(base_dir, "transcripts")
+output_folder = os.path.join(base_dir, "tokens")
 
 os.makedirs(output_folder, exist_ok=True)
 
 # Get all .txt transcript files
 txt_files = [f for f in os.listdir(input_folder) if f.endswith(".txt")]
 
-def clean_stutter(text):
-    # remove filler words
-    text = re.sub(r"\b(uh|um|ah|er)\b", "", text, flags=re.IGNORECASE)
-
-    # remove repeated words
-    text = re.sub(r"\b(\w+)( \1\b)+", r"\1", text)
-
-    # remove repeated syllables like pa-pa
-    text = re.sub(r"(\w+)-\1", r"\1", text)
-
-    return text.strip()
-
 for file in txt_files:
 
     input_path = os.path.join(input_folder, file)
 
     with open(input_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+        text = f.read()
 
-    cleaned_tokens = []
-
-    for line in lines:
-        clean_line = clean_stutter(line)
-        tokens = clean_line.split()
-        cleaned_tokens.append(" ".join(tokens))
+    # Sentence tokenization
+    sentences = nltk.sent_tokenize(text)
 
     output_file = os.path.join(
         output_folder,
@@ -42,9 +32,9 @@ for file in txt_files:
     )
 
     with open(output_file, "w", encoding="utf-8") as f:
-        for line in cleaned_tokens:
-            f.write(line + "\n")
+        for sentence in sentences:
+            f.write(sentence.strip() + "\n")
 
-    print(f"Processed NLP tokens saved: {output_file}")
+    print(f"Processed sentence tokens saved: {output_file}")
 
-print("NLP processing completed ✅")
+print("NLP processing completed successfully.")
