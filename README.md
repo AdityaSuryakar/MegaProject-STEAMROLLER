@@ -4,17 +4,6 @@ Steamroller is an intelligent audio processing and analysis system that combines
 
 ---
 
-## 👥 Team Members
-
-| Role | Name |
-|------|------|
-| **NLP Processing** | Pranali Sawant |
-| **Repair Agents** | Sanika Sathe | Prachi Yargatti |
-| **Master_agent,voice Clone** | Satyajeet Patil |
-| **Streamlit UI** | Aditya Suryakar |
-
----
-
 ## 📋 Project Overview
 
 Steamroller consists of four integrated branches:
