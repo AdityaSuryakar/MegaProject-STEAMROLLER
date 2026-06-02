@@ -1,77 +1,107 @@
-# Audio to NLP Sentence Tokenizer Pipeline
+# 🚂 Steamroller
 
-A two-stage Python pipeline that:
-1. **Transcribes** `.wav` audio files to text using OpenAI Whisper
-2. **Tokenizes** the transcripts into sentences using NLTK
+Steamroller is an intelligent audio processing and analysis system that combines cutting-edge NLP, voice cloning, and interactive UI to deliver a comprehensive solution for audio transcription, tokenization, and user feedback.
 
 ---
 
-## Folder Structure
+## 👥 Team Members
+
+| Role | Name |
+|------|------|
+| **NLP Processing** | Pranali Sawant |
+| **Repair Agents** | Sanika Sathe | Prachi Yargatti |
+| **Master_agent,voice Clone** | Satyajeet Patil |
+| **Streamlit UI** | Aditya Suryakar |
+
+---
+
+## 📋 Project Overview
+
+Steamroller consists of four integrated branches:
+
+1. **NLP Processing** - Processes audio transcripts into structured sentence tokens
+2. **Repair Agents** - Handles audio correction and enhancement
+3. **Feedback & Voice Clone** - Implements voice cloning and user feedback systems
+4. **Streamlit UI** - Provides an interactive user interface for the entire pipeline
+
+### Core Pipeline: Audio to NLP Sentence Tokenizer
+
+A two-stage Python pipeline that transforms raw audio into tokenized sentences:
+
+- **Stage 1**: Transcribes `.wav` audio files to text using OpenAI Whisper
+- **Stage 2**: Tokenizes the transcripts into sentences using NLTK
+
+---
+
+## 📁 Folder Structure
 
 ```
-MegaProject-main/
+Steamroller/
 │
-├── audio/                        # Place your .wav audio files here (input)
+├── audio/                        # Input: Place your .wav audio files here
 │
-├── transcripts/                  # Auto-created: Whisper transcription output (.txt)
+├── transcripts/                  # Output: Whisper transcription results (.txt)
 │
-├── tokens/                       # Auto-created: Sentence-tokenized output (.txt)
+├── tokens/                       # Output: Sentence-tokenized transcripts (.txt)
 │
-├── audioToTextConvertor.py       # Stage 1 - Transcribes audio to text
-├── nlp_tokenizer.py              # Stage 2 - Tokenizes transcripts into sentences
-└── README.md
+├── audioToTextConvertor.py       # Stage 1 - Audio to text transcription
+├── nlp_tokenizer.py              # Stage 2 - Sentence tokenization
+├── app.py                        # Streamlit UI application
+└── README.md                     # This file
 ```
 
 ---
 
-## Prerequisites
+## 🔧 Prerequisites
 
 ### 1. Python
-Make sure Python 3.8+ is installed.  
-Download from: https://www.python.org/downloads/
+Ensure Python 3.8+ is installed.
+- **Download**: [https://www.python.org/downloads/](https://www.python.org/downloads/)
+- **Verify installation**:
+  ```bash
+  python --version
+  ```
 
 ### 2. FFmpeg
 Required by Whisper to read audio files.
-
-- Download from: https://ffmpeg.org/download.html  
-- After installing, ensure `ffmpeg` is added to your **system PATH**  
-- Verify with:
-  ```powershell
+- **Download**: [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
+- **Add to PATH**: Ensure `ffmpeg` is in your system PATH
+- **Verify installation**:
+  ```bash
   ffmpeg -version
   ```
 
 ### 3. Python Dependencies
-
 Install required packages:
-
-```powershell
+```bash
 pip install openai-whisper nltk
+```
+
+For Streamlit UI:
+```bash
+pip install streamlit
 ```
 
 ---
 
-## How to Run
+## 🚀 How to Run
 
-### Step 1 — Add your audio files
-
+### Step 1: Prepare Your Audio Files
 Place all `.wav` audio files inside the `audio/` folder:
 
 ```
-MegaProject-main/
+Steamroller/
 └── audio/
     ├── sample1.wav
     ├── sample2.wav
     └── ...
 ```
 
----
-
-### Step 2 — Transcribe audio to text
-
+### Step 2: Transcribe Audio to Text
 Run the transcription script:
 
-```powershell
-cd "MegaProject-main"
+```bash
+cd Steamroller
 python audioToTextConvertor.py
 ```
 
@@ -80,63 +110,119 @@ python audioToTextConvertor.py
 - Transcribes each using OpenAI Whisper (`tiny` model)
 - Saves transcripts as `.txt` files in the `transcripts/` folder
 
-> ⚠️ This runs on CPU by default and may take several minutes for large audio files.
+⚠️ **Note**: This runs on CPU by default and may take several minutes for large audio files.
 
-**Example output:**
+**Example Output:**
 ```
-Transcribing: audio\sample1.wav
-Saved: transcripts\sample1.txt
+Transcribing: audio/sample1.wav
+Saved: transcripts/sample1.txt
 
 All audio files transcribed successfully
 ```
 
----
-
-### Step 3 — Tokenize transcripts into sentences
-
+### Step 3: Tokenize Transcripts into Sentences
 Run the NLP tokenizer:
 
-```powershell
+```bash
 python nlp_tokenizer.py
 ```
 
 **What it does:**
 - Reads all `.txt` files from the `transcripts/` folder
 - Splits each transcript into individual sentences using NLTK
-- Saves one sentence per line in the `tokens/` folder
+- Saves tokenized output to the `tokens/` folder
 
-**Example output:**
+**Example Output:**
 ```
-Processed sentence tokens saved: tokens\sample1_tokens.txt
+Processed sentence tokens saved: tokens/sample1_tokens.txt
 NLP processing completed successfully.
 ```
 
+### Step 4: Launch the Streamlit UI (Optional)
+To use the interactive interface:
+
+```bash
+streamlit run app.py
+```
+
 ---
 
-## Output Format
+## 📊 Output Format
 
-### `transcripts/sample1.txt`
+### Input Audio File
+`audio/sample1.wav` - Raw audio file
+
+### Transcription Output
+`transcripts/sample1.txt`
 ```
 Hello my name is John and I am from New York.
 I have been working in software for five years.
 ```
 
-### `tokens/sample1_tokens.txt`
+### Tokenized Output
+`tokens/sample1_tokens.txt`
 ```
 Hello my name is John and I am from New York.
 I have been working in software for five years.
 ```
-Each line = one sentence token.
+
+Each line represents one sentence token.
 
 ---
 
-## Notes
+## ⚙️ Configuration & Customization
 
-- The `transcripts/` and `tokens/` folders are **created automatically** — no need to create them manually.
-- Scripts use **relative paths**, so they work from any location on your system.
-- NLTK's `punkt` tokenizer data is downloaded automatically on first run.
-- To use a more accurate Whisper model (slower), change `"tiny"` to `"base"`, `"small"`, or `"medium"` in `audioToTextConvertor.py`:
-  ```python
-  model = whisper.load_model("base")
-  ```
-  
+### Use a More Accurate Whisper Model
+The pipeline defaults to the `tiny` model for speed. For better accuracy (with slower processing), modify `audioToTextConvertor.py`:
+
+```python
+model = whisper.load_model("base")  # Options: "tiny", "base", "small", "medium", "large"
+```
+
+
+## 📝 Notes
+
+- The `transcripts/` and `tokens/` folders are created automatically — no manual creation needed
+- Scripts use relative paths, so they work from any location on your system
+- NLTK's `punkt` tokenizer data is downloaded automatically on first run
+- Whisper supports multiple languages — transcripts will be detected automatically
+- Voice cloning features are handled by the Feedback & Voice Clone branch
+- The Streamlit UI provides a user-friendly interface for all operations
+
+---
+
+## 🔗 Dependencies Used
+
+- **[OpenAI Whisper](https://github.com/openai/whisper)** - State-of-the-art speech recognition
+- **[NLTK](https://www.nltk.org/)** - Natural Language Toolkit for sentence tokenization
+- **[Streamlit](https://streamlit.io/)** - Interactive web app framework
+
+---
+
+## 🎯 Project Goals
+
+- ✅ Automated audio transcription with high accuracy
+- ✅ Intelligent sentence tokenization for NLP tasks
+- ✅ Voice cloning and feedback mechanisms
+- ✅ Intuitive user interface for non-technical users
+- ✅ Scalable architecture for batch processing
+
+---
+
+## 📧 Support & Questions
+
+For issues or questions, please reach out to the respective team member for your area of interest:
+- **Audio Processing**: Pranali Sawant
+- **System Repair/Enhancement**: Sanika Sathe
+- **Voice & Feedback**: Satyajeet
+- **UI/UX**: Aditya Suryakar
+
+---
+
+## 📄 License
+
+This project was created for HackoUtsav-2026 hackathon.
+
+---
+
+**Happy Processing! 🚀**
