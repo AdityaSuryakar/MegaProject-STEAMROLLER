@@ -14,14 +14,15 @@ uploads/*.ogg
 # Preserve directory structure
 !outputs/.gitkeep
 !uploads/.gitkeep
-!voices/.gitkeep
 
-# Environments & IDE
+# Environment variables & local secrets
 .env
 .venv/
 venv/
 ENV/
 env/
+
+# IDE & OS
 .vscode/
 .idea/
 .DS_Store

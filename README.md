@@ -231,31 +231,56 @@ $$\text{Final Score} = 0.50 \cdot S_{\text{meaning}} + 0.30 \cdot S_{\text{gramm
 ## 📁 Project Structure
 
 ```text
-STEAMROLLER/
-├── app.py                     # Streamlit frontend & interactive dashboard
-├── audio_pipeline.py          # Audio pre-processing & Whisper ASR pipeline
-├── nlp_cleaner.py             # Rule-based regex cleaner & repetition detector
-├── repair_agents.py           # Specialized repair agents & single-agent repairs
-├── repair_agents_runner.py    # ThreadPoolExecutor runner for parallel agent execution
-├── master_agent.py            # Master Agent scoring, thresholding & feedback loop
-├── tts_engine.py              # Local TTS dispatcher (pyttsx3 & gTTS)
-├── voice_clone.py             # Thin HTTP client for remote F5-TTS server
-├── kaggle_server_cell.py      # Production Flask + ngrok server cell for Kaggle/Colab GPU
-├── requirements.txt           # Python dependencies
-└── README.md                  # System documentation
+Steamroller_Refactored/
+├── app.py                      # Streamlit interactive frontend
+├── pipeline.py                 # Core headless pipeline orchestrator
+├── requirements.txt            # Local Python dependencies
+├── .env.example                # Example configuration and environment template
+├── .gitignore                  # Git ignore rules for caches, .env, and runtime audio
+├── config/
+│   ├── __init__.py
+│   └── settings.py             # Centralized settings & environment loader
+├── asr/
+│   ├── __init__.py
+│   └── whisper_asr.py          # OpenAI Whisper speech-to-text inference
+├── nlp/
+│   ├── __init__.py
+│   └── cleaner.py              # Stutter pattern, syllable repeat & filler removal
+├── agents/
+│   ├── __init__.py
+│   └── repair_agents.py        # 4 specialized repair agents + heuristic evaluator
+├── services/
+│   ├── __init__.py
+│   └── kaggle_gpu.py           # Kaggle API kernel auto-launch & health service
+├── tts/
+│   ├── __init__.py
+│   └── f5_tts_client.py        # Zero-shot F5-TTS remote client
+├── ui/
+│   ├── __init__.py
+│   ├── recorder.py             # Audio input recorder & upload handling
+│   └── styles.py               # Modern responsive CSS styles
+├── utils/
+│   ├── __init__.py
+│   ├── audio_utils.py          # Audio format conversion & normalization
+│   └── errors.py               # Typed exception hierarchy
+├── kaggle_server/
+│   ├── f5_tts_server.py        # Production FastAPI server script for Kaggle cell
+│   └── final-f5tts.ipynb       # Jupyter notebook for Kaggle GPU environment
+├── outputs/                    # Runtime synthesized audio output directory
+└── uploads/                    # Runtime user recording upload directory
 ```
 
 ### Main Components Overview
 
-- [app.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/app.py): Streamlit dashboard with file uploader, microphone recorder, audio player, agent outputs, and iteration state debugger.
-- [audio_pipeline.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/audio_pipeline.py): Loads Whisper model, normalizes incoming audio samples to 16kHz mono, and extracts raw text.
-- [nlp_cleaner.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/nlp_cleaner.py): Detects syllable stutters (`b-b-`), word/phrase repetitions, and cleans common fillers.
-- [repair_agents.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/repair_agents.py): Defines `MeaningPreservationAgent`, `GrammarOptimizedAgent`, `ConciseFluentAgent`, and `SequenceOptimizedAgent`.
-- [repair_agents_runner.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/repair_agents_runner.py): Concurrently runs all agents across CPU worker threads.
-- [master_agent.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/master_agent.py): Computes heuristic metrics, manages candidate selection, and drives iterative feedback.
-- [tts_engine.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/tts_engine.py): Synthesizes fluent speech using local engines.
-- [voice_clone.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/voice_clone.py): Streams synthesized voice cloning requests to remote F5-TTS servers.
-- [kaggle_server_cell.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller/kaggle_server_cell.py): Ready-to-run Jupyter/Kaggle cell for zero-shot F5-TTS inference.
+- [app.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/app.py): Streamlit dashboard with file uploader, microphone recorder, audio player, status tracking, and error boundaries.
+- [pipeline.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/pipeline.py): Standalone orchestrator coordinating Whisper ASR, NLP cleaning, multi-agent repair, and F5-TTS synthesis.
+- [settings.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/config/settings.py): Centralized environment and configuration settings loaded via `python-dotenv`.
+- [whisper_asr.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/asr/whisper_asr.py): Whisper speech recognition engine decoding raw audio into transcript text.
+- [cleaner.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/nlp/cleaner.py): Rule-based NLP cleaner detecting syllable stutters (`b-b-`), repetitions, and fillers.
+- [repair_agents.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/agents/repair_agents.py): Parallel repair agents and heuristic Master Agent evaluator.
+- [kaggle_gpu.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/services/kaggle_gpu.py): Kaggle GPU kernel service with health checks, auto-discovery, and auto-launch.
+- [f5_tts_client.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/tts/f5_tts_client.py): HTTP client transmitting audio and text to the remote F5-TTS backend.
+- [f5_tts_server.py](file:///d:/Projects/Steamroller_f5tts%20(2)/Steamroller_Refactored/kaggle_server/f5_tts_server.py): FastAPI GPU server with resident F5-TTS model and pyngrok tunnel.
 
 ---
 
@@ -269,8 +294,8 @@ STEAMROLLER/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/steamroller.git
-cd steamroller
+git clone https://github.com/AdityaSuryakar/MegaProject-STEAMROLLER.git
+cd MegaProject-STEAMROLLER/Steamroller_Refactored
 
 # Create a virtual environment (recommended)
 python -m venv venv
@@ -290,7 +315,7 @@ streamlit run app.py
 ```
 
 > [!TIP]
-> **Performance Recommendation**: The default Whisper model is configured to `tiny` for rapid inference. For best latency (under 60 seconds), use audio recordings between **5 and 30 seconds**.
+> **Performance Recommendation**: For fast sub-minute processing on consumer laptops, audio recordings between **5 and 30 seconds** are recommended.
 
 ---
 

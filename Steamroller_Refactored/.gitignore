@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Audio outputs & temporary uploads (keep directory, ignore runtime audio files)
+outputs/*.wav
+outputs/*.mp3
+outputs/*.ogg
+uploads/*.wav
+uploads/*.mp3
+uploads/*.ogg
+
+# Preserve directory structure
+!outputs/.gitkeep
+!uploads/.gitkeep
+
+# Environment variables & local secrets
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
