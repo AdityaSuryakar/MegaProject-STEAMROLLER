@@ -17,14 +17,16 @@ class MasterVerdict:
 
 
 class MasterAgent:
-    def __init__(self, threshold=0.75, max_iterations=3):
+    def __init__(self, threshold=0.80, max_iterations=3):
         self.threshold = threshold
         self.max_iterations = max_iterations
         self.runner = RepairAgentsRunner()
 
+    # 1. Meaning Preservation Agent Score
     def calculate_meaning_preservation_score(self, original_text, repaired_text):
         return SequenceMatcher(None, original_text, repaired_text).ratio()
 
+    # 2. Grammar-Optimized Agent Score
     def calculate_grammar_optimized_score(self, text):
         if not text:
             return 0.0
@@ -45,46 +47,33 @@ class MasterAgent:
 
         return max(score, 0.0)
 
+    # 3. Concise-Fluent Agent Score
     def calculate_concise_fluent_score(self, text):
         if not text:
             return 0.0
 
         words = text.lower().split()
-        n = len(words)
 
-        if n == 0:
+        if len(words) == 0:
             return 0.0
 
-        penalty = 0
+        repeated_count = 0
 
-        # Single word repetition: "I I I"
-        for i in range(1, n):
+        for i in range(1, len(words)):
             if words[i] == words[i - 1]:
-                penalty += 2
+                repeated_count += 1
 
-        # Two-word repetition: "to go to go"
-        for i in range(3, n):
-            if words[i] == words[i - 2] and words[i - 1] == words[i - 3]:
-                penalty += 3
-
-        # Phrase repetition: "I'm in my I'm in my"
-        text_str = " ".join(words)
-        phrases = re.findall(r'(\b\w+(?:\s+\w+){1,4})\s+\1', text_str)
-        penalty += len(phrases) * 4
-
-        # Partial stutter: "wa wa want"
-        for i in range(1, n):
-            if len(words[i - 1]) >= 2 and words[i].startswith(words[i - 1]):
-                penalty += 1
-
-        score = 1 - (penalty / n)
+        score = 1 - (repeated_count / len(words))
         return max(score, 0.0)
 
+    # 4. Sequence-Optimized Agent Score
     def calculate_sequence_optimized_score(self, original_text, repaired_text):
         original_words = original_text.split()
         repaired_words = repaired_text.split()
+
         return SequenceMatcher(None, original_words, repaired_words).ratio()
 
+    # Final Score
     def calculate_final_score(self, original_text, repaired_text):
         meaning_score = self.calculate_meaning_preservation_score(
             original_text,
@@ -105,9 +94,9 @@ class MasterAgent:
         )
 
         final_score = (
-            0.40 * meaning_score +
-            0.20 * grammar_score +
-            0.35 * concise_fluent_score +
+            0.50 * meaning_score +
+            0.30 * grammar_score +
+            0.15 * concise_fluent_score +
             0.05 * sequence_score
         )
 
@@ -119,6 +108,7 @@ class MasterAgent:
             "final_score": final_score
         }
 
+    # Evaluate all 4 agent outputs
     def evaluate_outputs(self, agent_outputs):
         scored_outputs = []
 
@@ -140,6 +130,7 @@ class MasterAgent:
 
         return scored_outputs
 
+    # Select best output using threshold
     def select_best_output(self, scored_outputs):
         above_threshold = []
 
@@ -158,6 +149,7 @@ class MasterAgent:
 
         return None
 
+    # Feedback loop
     def run(self, tokens, prompt=None):
         current_tokens = tokens
         all_iterations = []

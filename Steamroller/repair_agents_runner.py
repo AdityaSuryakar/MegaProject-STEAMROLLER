@@ -25,21 +25,6 @@ class RepairAgentsRunner:
     def run_agent(self, agent_name, agent, original_text, prompt=None):
         repaired_text = agent.repair_text(original_text, prompt)
 
-        #  Slight variation per agent (important for better selection)
-        if agent_name == "sequence_optimized_agent":
-            # preserve structure more
-            repaired_text = repaired_text
-
-        elif agent_name == "concise_fluent_agent":
-            # extra cleanup for repetition
-            import re
-            repaired_text = re.sub(r'(.+?)\s+\1', r'\1', repaired_text)
-
-        elif agent_name == "grammar_optimized_agent":
-            # ensure punctuation
-            if not repaired_text.endswith((".", "!", "?")):
-                repaired_text += "."
-
         return {
             "agent_name": agent_name,
             "original_text": original_text,

@@ -1,122 +1,88 @@
 import re
+from dataclasses import dataclass
+from typing import List, Optional
 
 
 class BaseRepairAgent:
-    def repair_text(self, S, prompt=None):
+    def repair_text(self, text: str, prompt: Optional[str] = None) -> str:
         raise NotImplementedError
 
 
-def clean_stutter(S):
-    if not S:
-        return S
-
-    # Remove filler words
-    S = re.sub(
-        r"\b(uh|um|ah|er|hmm|you know|like|basically)\b[,\.\s]*",
-        "",
-        S,
-        flags=re.IGNORECASE
-    )
-
-    # Fix broken stutter: b-b-because -> because
-    S = re.sub(r'\b(\w)-(\1-)+(\w+)', r'\1\3', S)
-
-    # Remove repeated words: I I I -> I
-    S = re.sub(r'\b(\w+)(\s+\1\b)+', r'\1', S, flags=re.IGNORECASE)
-
-    # Remove repeated phrases: "which is which is", "I want to I want to"
-    for n in range(5, 1, -1):
-        pattern = r'\b((?:\w+\s+){' + str(n - 1) + r'}\w+)\s+\1\b'
-        S = re.sub(pattern, r'\1', S, flags=re.IGNORECASE)
-
-    # Remove comma repeated words: thing, thing -> thing
-    S = re.sub(r'\b(\w+),\s+\1\b', r'\1', S, flags=re.IGNORECASE)
-
-    # Remove comma repeated phrases: my best, my best -> my best
-    S = re.sub(r'\b(\w+\s+\w+),\s+\1\b', r'\1', S, flags=re.IGNORECASE)
-
-    # Fix repeated connectors: on the, in the -> in the
-    S = re.sub(
-        r'\b(on the|in the|at the),?\s+(on the|in the|at the)\b',
-        r'\2',
-        S,
-        flags=re.IGNORECASE
-    )
-
-    # Fix partial phrase restart: I'm in my I'm in the -> I'm in the
-    S = re.sub(
-        r"\b(I'?m|I am)\s+in\s+(my|the)\s+(I'?m|I am)\s+in\s+(my|the)\b",
-        r"\3 in \4",
-        S,
-        flags=re.IGNORECASE
-    )
-
-    # Remove repeated starters: And and, Because because
-    S = re.sub(
-        r'\b(And|Because|Well|Okay),?\s+\1\b',
-        r'\1',
-        S,
-        flags=re.IGNORECASE
-    )
-
-    # Remove repeated dotted words: And... and...
-    S = re.sub(r'\b(\w+)\s*\.\.\.\s*\1\b', r'\1', S, flags=re.IGNORECASE)
-
-    # Clean spaces before punctuation
-    S = re.sub(r"\s+([,.!?])", r"\1", S)
-
-    # Clean multiple commas
-    S = re.sub(r",\s*,+", ",", S)
-
-    # Normalize spaces
-    S = re.sub(r"\s+", " ", S)
-
-    return S.strip(" ,.")
+def normalize_sentence(text: str) -> str:
+    text = re.sub(r"\s+", " ", text or "").strip(" ,")
+    text = re.sub(r"\s+([,.!?])", r"\1", text)
+    text = re.sub(r"([,.!?])(?=\S)", r"\1 ", text)
+    text = re.sub(r"\bi\b", "I", text, flags=re.IGNORECASE)
+    if text:
+        text = text[0].upper() + text[1:]
+    if text and not text.endswith((".", "!", "?")):
+        text += "."
+    return text
 
 
 class MeaningPreservationAgent(BaseRepairAgent):
-    def repair_text(self, S, prompt=None):
-        return clean_stutter(S)
+    def repair_text(self, text: str, prompt: Optional[str] = None) -> str:
+        text = re.sub(r"\b(uh|um|ah|er|hmm|you know)\b[,.\s]*", " ", text or "", flags=re.IGNORECASE)
+        return normalize_sentence(text)
 
 
 class GrammarOptimizedAgent(BaseRepairAgent):
-    def repair_text(self, S, prompt=None):
-        S = clean_stutter(S)
-
-        if not S:
-            return S
-
-        S = S.strip()
-
-        if S:
-            S = S[0].upper() + S[1:]
-
-        if not S.endswith((".", "?", "!")):
-            S += "."
-
-        return S
+    def repair_text(self, text: str, prompt: Optional[str] = None) -> str:
+        text = re.sub(r"\b(can not)\b", "cannot", text or "", flags=re.IGNORECASE)
+        text = re.sub(r"\b(dont)\b", "don't", text, flags=re.IGNORECASE)
+        text = re.sub(r"\b(cant)\b", "can't", text, flags=re.IGNORECASE)
+        return normalize_sentence(text)
 
 
 class ConciseFluentAgent(BaseRepairAgent):
-    def repair_text(self, S, prompt=None):
-        S = clean_stutter(S)
-
-        # Extra aggressive repeated phrase cleanup
-        S = re.sub(r'(.{5,80}?)\s+\1', r'\1', S, flags=re.IGNORECASE)
-
-        return S.strip()
+    def repair_text(self, text: str, prompt: Optional[str] = None) -> str:
+        text = text or ""
+        text = re.sub(r"\b(uh|um|ah|er|hmm|you know|basically|actually|like)\b", " ", text, flags=re.IGNORECASE)
+        text = re.sub(r"\b(\w+)(?:\s+\1\b)+", r"\1", text, flags=re.IGNORECASE)
+        text = re.sub(r"([a-zA-Z])\1{2,}", r"\1", text)
+        return normalize_sentence(text)
 
 
 class SequenceOptimizedAgent(BaseRepairAgent):
-    def repair_text(self, S, prompt=None):
-        return clean_stutter(S)
+    def repair_text(self, text: str, prompt: Optional[str] = None) -> str:
+        text = text or ""
+        # Remove short restart fragments like "I-I-I" or "w-w-want" that may survive ASR.
+        text = re.sub(r"\b([A-Za-z]{1,3}-)+(?=[A-Za-z])", "", text)
+        text = re.sub(r"\b(\w+)(?:[,.\s]+\1\b)+", r"\1", text, flags=re.IGNORECASE)
+        return normalize_sentence(text)
 
 
-def run_multi_agent_repair(cleaned_text, original_text=None):
-    from master_agent import MasterAgent
+@dataclass
+class RepairCandidate:
+    agent_name: str
+    repaired_text: str
+    confidence: float
+    explanation: str
 
-    master = MasterAgent()
-    tokens = cleaned_text.split()
-    verdict = master.run(tokens)
 
-    return verdict
+@dataclass
+class RepairVerdict:
+    chosen_candidate: RepairCandidate
+    all_candidates: List[RepairCandidate]
+    reasoning: str
+    final_text: str
+
+
+def _score_candidate(original_text: str, repaired_text: str) -> float:
+    if not repaired_text:
+        return 0.0
+    words = repaired_text.lower().split()
+    repeated = sum(1 for i in range(1, len(words)) if words[i] == words[i - 1])
+    punctuation = 1.0 if repaired_text.endswith((".", "!", "?")) else 0.7
+    length_ratio = min(len(repaired_text) / max(len(original_text), 1), 1.0)
+    return max(0.45, min(0.98, 0.55 + 0.25 * punctuation + 0.15 * length_ratio - 0.08 * repeated))
+
+
+def run_multi_agent_repair(pre_cleaned_text: str, original_text: Optional[str] = None, context: Optional[str] = None) -> RepairVerdict:
+    agents = [MeaningPreservationAgent(), GrammarOptimizedAgent(), ConciseFluentAgent(), SequenceOptimizedAgent()]
+    candidates: List[RepairCandidate] = []
+    for agent in agents:
+        repaired = agent.repair_text(pre_cleaned_text, context)
+        candidates.append(RepairCandidate(agent.__class__.__name__, repaired, _score_candidate(pre_cleaned_text, repaired), "Local fast rule-based repair."))
+    chosen = max(candidates, key=lambda c: c.confidence)
+    return RepairVerdict(chosen, candidates, f"Selected {chosen.agent_name} for the final fluent output.", chosen.repaired_text)
