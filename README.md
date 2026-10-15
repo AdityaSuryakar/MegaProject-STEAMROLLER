@@ -1,217 +1,235 @@
-# 🚂 Steamroller
+# STEAMROLLER - Speech Repair Assistant
 
-Steamroller is an intelligent audio processing and analysis system that combines cutting-edge NLP, voice cloning, and interactive UI to deliver a comprehensive solution for audio transcription, tokenization, and user feedback.
+**STEAMROLLER** is a multi-agent speech repair system designed to improve the readability and fluency of speech affected by repetitions, prolongations, blocks, and filler words.
 
----
-
-## 📋 Project Overview
-
-Steamroller consists of four integrated branches:
-
-1. **NLP Processing** - Processes audio transcripts into structured sentence tokens
-2. **Repair Agents** - Handles audio correction and enhancement
-3. **Feedback & Voice Clone** - Implements voice cloning and user feedback systems
-4. **Streamlit UI** - Provides an interactive user interface for the entire pipeline
-
-### Core Pipeline: Audio to NLP Sentence Tokenizer
-
-A two-stage Python pipeline that transforms raw audio into tokenized sentences:
-
-- **Stage 1**: Transcribes `.wav` audio files to text using OpenAI Whisper
-- **Stage 2**: Tokenizes the transcripts into sentences using NLTK
+The system combines automatic speech recognition, NLP-based preprocessing, specialized repair agents, multi-agent evaluation, iterative feedback, and text-to-speech generation.
 
 ---
 
-## 📁 Folder Structure
+## Architecture
 
-```
-Steamroller/
-│
-├── audio/                        # Input: Place your .wav audio files here
-│
-├── transcripts/                  # Output: Whisper transcription results (.txt)
-│
-├── tokens/                       # Output: Sentence-tokenized transcripts (.txt)
-│
-├── audioToTextConvertor.py       # Stage 1 - Audio to text transcription
-├── nlp_tokenizer.py              # Stage 2 - Sentence tokenization
-├── app.py                        # Streamlit UI application
-└── README.md                     # This file
-```
-
----
-
-## 🔧 Prerequisites
-
-### 1. Python
-Ensure Python 3.8+ is installed.
-- **Download**: [https://www.python.org/downloads/](https://www.python.org/downloads/)
-- **Verify installation**:
-  ```bash
-  python --version
-  ```
-
-### 2. FFmpeg
-Required by Whisper to read audio files.
-- **Download**: [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
-- **Add to PATH**: Ensure `ffmpeg` is in your system PATH
-- **Verify installation**:
-  ```bash
-  ffmpeg -version
-  ```
-
-### 3. Python Dependencies
-Install required packages:
-```bash
-pip install openai-whisper nltk
-```
-
-For Streamlit UI:
-```bash
-pip install streamlit
+```text
+Input Audio
+    |
+    v
+Whisper ASR
+    |
+    v
+NLP Cleaning
+    |
+    v
++----------------------------------+
+|       Parallel Repair Agents     |
+|                                  |
+|  Meaning Preservation Agent      |
+|  Grammar Optimized Agent         |
+|  Concise Fluent Agent            |
+|  Sequence Optimized Agent        |
++----------------------------------+
+    |
+    v
+Candidate Outputs
+    |
+    v
+Master Agent
+    |
+    +--> Meaning Preservation Score
+    +--> Grammar Score
+    +--> Fluency Score
+    +--> Sequence Score
+    |
+    v
+Best Candidate
+    |
+    +--> Threshold satisfied -> Final Output
+    |
+    +--> Threshold not satisfied
+             |
+             v
+       Feedback Iteration
+       (maximum 3 iterations)
+    |
+    v
+Text-to-Speech
+    |
+    v
+Repaired Audio
 ```
 
 ---
 
-## 🚀 How to Run
+## Multi-Agent Design
 
-### Step 1: Prepare Your Audio Files
-Place all `.wav` audio files inside the `audio/` folder:
+STEAMROLLER uses four specialized rule-based repair agents:
 
+- **Meaning Preservation Agent**: Removes common filler words while preserving the original meaning.
+- **Grammar Optimized Agent**: Applies lightweight grammar and normalization corrections.
+- **Concise Fluent Agent**: Removes fillers, repeated words, and repeated characters to improve fluency.
+- **Sequence Optimized Agent**: Handles short restart fragments and repeated word sequences.
+
+The agents are executed in parallel using Python's `ThreadPoolExecutor`.
+
+Each agent generates an independent candidate repair. The candidates are then passed to the Master Agent for evaluation and selection.
+
+---
+
+## Master Agent
+
+The Master Agent implements an iterative evaluation and feedback loop.
+
+Candidate outputs are evaluated using four heuristic scores:
+
+| Metric | Weight |
+| :--- | :--- |
+| Meaning preservation | 50% |
+| Grammar quality | 30% |
+| Concise fluency | 15% |
+| Sequence similarity | 5% |
+
+The combined score is compared against a threshold of **0.80**.
+
+- If a candidate satisfies the threshold, the highest-scoring valid candidate is selected.
+- If no candidate satisfies the threshold, the highest-scoring candidate is fed into another iteration.
+- The process is bounded to a maximum of **3 iterations**.
+- Intermediate candidate outputs and iteration scores are retained as execution state.
+
+This provides an explicit candidate-generation, evaluation, selection, and feedback mechanism.
+
+---
+
+## Technology Stack
+
+- **Python**
+- **Streamlit**
+- **OpenAI Whisper**
+- **NLTK**
+- **PyTorch**
+- **NumPy**
+- **SciPy**
+- **gTTS**
+- **pyttsx3**
+- **F5-TTS** (for optional voice cloning)
+- **Flask & ngrok** (for the optional remote F5-TTS backend)
+
+---
+
+## Project Structure
+
+```text
+STEAMROLLER/
+|
+|-- app.py
+|-- audio_pipeline.py
+|-- nlp_cleaner.py
+|-- repair_agents.py
+|-- repair_agents_runner.py
+|-- master_agent.py
+|-- tts_engine.py
+|-- voice_clone.py
+|-- kaggle_server_cell.py
+|-- requirements.txt
+|-- README.md
+|-- .gitignore
 ```
-Steamroller/
-└── audio/
-    ├── sample1.wav
-    ├── sample2.wav
-    └── ...
-```
 
-### Step 2: Transcribe Audio to Text
-Run the transcription script:
+---
+
+## Main Components
+
+- **`app.py`**: Streamlit application and user interface.
+- **`audio_pipeline.py`**: Handles the audio processing and speech recognition pipeline.
+- **`nlp_cleaner.py`**: Performs transcript cleaning and preprocessing.
+- **`repair_agents.py`**: Contains the specialized speech repair agents.
+- **`repair_agents_runner.py`**: Runs the repair agents in parallel and collects their candidate outputs.
+- **`master_agent.py`**: Evaluates candidates, selects the best output, and manages the iterative feedback loop.
+- **`tts_engine.py`**: Handles text-to-speech generation.
+- **`voice_clone.py`**: Client for the optional remote F5-TTS voice cloning service.
+- **`kaggle_server_cell.py`**: Example Flask server setup for exposing an F5-TTS service from a GPU notebook.
+
+---
+
+## Installation
+
+Clone the repository and install the dependencies:
 
 ```bash
-cd Steamroller
-python audioToTextConvertor.py
+pip install -r requirements.txt
 ```
 
-**What it does:**
-- Loads all `.wav` files from the `audio/` folder
-- Transcribes each using OpenAI Whisper (`tiny` model)
-- Saves transcripts as `.txt` files in the `transcripts/` folder
-
-⚠️ **Note**: This runs on CPU by default and may take several minutes for large audio files.
-
-**Example Output:**
-```
-Transcribing: audio/sample1.wav
-Saved: transcripts/sample1.txt
-
-All audio files transcribed successfully
-```
-
-### Step 3: Tokenize Transcripts into Sentences
-Run the NLP tokenizer:
-
-```bash
-python nlp_tokenizer.py
-```
-
-**What it does:**
-- Reads all `.txt` files from the `transcripts/` folder
-- Splits each transcript into individual sentences using NLTK
-- Saves tokenized output to the `tokens/` folder
-
-**Example Output:**
-```
-Processed sentence tokens saved: tokens/sample1_tokens.txt
-NLP processing completed successfully.
-```
-
-### Step 4: Launch the Streamlit UI (Optional)
-To use the interactive interface:
+Run the Streamlit application:
 
 ```bash
 streamlit run app.py
 ```
 
----
-
-## 📊 Output Format
-
-### Input Audio File
-`audio/sample1.wav` - Raw audio file
-
-### Transcription Output
-`transcripts/sample1.txt`
-```
-Hello my name is John and I am from New York.
-I have been working in software for five years.
-```
-
-### Tokenized Output
-`tokens/sample1_tokens.txt`
-```
-Hello my name is John and I am from New York.
-I have been working in software for five years.
-```
-
-Each line represents one sentence token.
+> **Note**: Default Whisper model is `tiny` for fast processing. Using short audio clips (5–30 seconds) is recommended for fast turnaround.
 
 ---
 
-## ⚙️ Configuration & Customization
+## Optional F5-TTS Voice Cloning
 
-### Use a More Accurate Whisper Model
-The pipeline defaults to the `tiny` model for speed. For better accuracy (with slower processing), modify `audioToTextConvertor.py`:
+The default application uses local text-to-speech (`pyttsx3` / `gTTS`).
 
-```python
-model = whisper.load_model("base")  # Options: "tiny", "base", "small", "medium", "large"
+For voice cloning, STEAMROLLER can connect to an F5-TTS server running on a GPU notebook (e.g., Kaggle).
+
+The local application reads the server address from the environment variable:
+`KAGGLE_TTS_URL`
+
+### Setting the Environment Variable
+
+**Windows PowerShell:**
+```powershell
+$env:KAGGLE_TTS_URL="https://YOUR-NGROK-URL"
+streamlit run app.py
 ```
 
+**macOS / Linux:**
+```bash
+export KAGGLE_TTS_URL="https://YOUR-NGROK-URL"
+streamlit run app.py
+```
 
-## 📝 Notes
+### Kaggle Notebook Setup
+The Kaggle server setup is provided in:
+`kaggle_server_cell.py`
 
-- The `transcripts/` and `tokens/` folders are created automatically — no manual creation needed
-- Scripts use relative paths, so they work from any location on your system
-- NLTK's `punkt` tokenizer data is downloaded automatically on first run
-- Whisper supports multiple languages — transcripts will be detected automatically
-- Voice cloning features are handled by the Feedback & Voice Clone branch
-- The Streamlit UI provides a user-friendly interface for all operations
-
----
-
-## 🔗 Dependencies Used
-
-- **[OpenAI Whisper](https://github.com/openai/whisper)** - State-of-the-art speech recognition
-- **[NLTK](https://www.nltk.org/)** - Natural Language Toolkit for sentence tokenization
-- **[Streamlit](https://streamlit.io/)** - Interactive web app framework
+1. Open your Kaggle notebook, enable a GPU accelerator, and add a Flask + ngrok cell (see `kaggle_server_cell.py` for code).
+2. Run the cell — it outputs a public ngrok URL (e.g. `https://abcd-1234.ngrok-free.app`).
+3. Set `KAGGLE_TTS_URL` to that URL before starting the app.
+4. Select "F5-TTS Voice Clone" as the output voice in the Streamlit UI.
+5. The GPU notebook/server must remain running for the remote voice cloning feature to work.
 
 ---
 
-## 🎯 Project Goals
+## Evaluation and State
 
-- ✅ Automated audio transcription with high accuracy
-- ✅ Intelligent sentence tokenization for NLP tasks
-- ✅ Voice cloning and feedback mechanisms
-- ✅ Intuitive user interface for non-technical users
-- ✅ Scalable architecture for batch processing
+The current evaluation mechanism is an experimental heuristic harness rather than a production-scale benchmark.
 
----
+The system retains:
+- Original transcript
+- Cleaned transcript
+- Candidate outputs
+- Individual quality scores
+- Selected candidate
+- Iteration history
+- Final threshold status
 
-## 📧 Support & Questions
-
-For issues or questions, please reach out to the respective team member for your area of interest:
-- **Audio Processing**: Pranali Sawant
-- **System Repair/Enhancement**: Sanika Sathe
-- **Voice & Feedback**: Satyajeet
-- **UI/UX**: Aditya Suryakar
+This execution state allows the system to inspect intermediate decisions and repeat the repair process when the quality threshold is not met.
 
 ---
 
-## 📄 License
+## Current Limitations
 
-This project was created for HackoUtsav-2026 hackathon.
+- Repair agents currently use deterministic NLP/rule-based techniques rather than LLM-based generation.
+- Evaluation scores are heuristic and are not calibrated probabilities.
+- The system is a research/demo prototype rather than a production deployment.
+- Processing is primarily designed for uploaded or recorded audio rather than continuous real-time speech.
+- F5-TTS voice cloning requires a separate GPU-backed service.
 
 ---
 
-**Happy Processing! 🚀**
+## Future Improvements
+
+- LLM-based contextual repair agents
+- Learned speech-repair evaluation metrics
+- Larger benchmark datasets for quantitative evaluation
